@@ -34,12 +34,15 @@ class PasskeyCredentialDelegate: NSObject, ASAuthorizationControllerDelegate, AS
             // Build response dictionary to match Android/JS
             let response: [String: Any] = [
                 "attestationObject": attestationObject,
-                "clientDataJSON": clientDataJSON
+                "clientDataJSON": clientDataJSON,
+                "transports": platformRegistrationTransports()
             ]
             let result: [String: Any] = [
                 "id": id,
                 "rawId": rawId,
                 "type": type,
+                "authenticatorAttachment": "platform",
+                "clientExtensionResults": [:],
                 "response": response
             ]
             completeOnce(with: .success(result))
@@ -66,6 +69,8 @@ class PasskeyCredentialDelegate: NSObject, ASAuthorizationControllerDelegate, AS
                 "id": id,
                 "rawId": rawId,
                 "type": type,
+                "authenticatorAttachment": "platform",
+                "clientExtensionResults": [:],
                 "response": response
             ]
             completeOnce(with: .success(result))
@@ -80,12 +85,15 @@ class PasskeyCredentialDelegate: NSObject, ASAuthorizationControllerDelegate, AS
             // Build response dictionary to match platform credentials
             let response: [String: Any] = [
                 "attestationObject": attestationObject,
-                "clientDataJSON": clientDataJSON
+                "clientDataJSON": clientDataJSON,
+                "transports": securityKeyRegistrationTransports()
             ]
             let result: [String: Any] = [
                 "id": id,
                 "rawId": rawId,
                 "type": type,
+                "authenticatorAttachment": "cross-platform",
+                "clientExtensionResults": [:],
                 "response": response
             ]
             completeOnce(with: .success(result))
@@ -112,6 +120,8 @@ class PasskeyCredentialDelegate: NSObject, ASAuthorizationControllerDelegate, AS
                 "id": id,
                 "rawId": rawId,
                 "type": type,
+                "authenticatorAttachment": "cross-platform",
+                "clientExtensionResults": [:],
                 "response": response
             ]
             completeOnce(with: .success(result))
@@ -169,5 +179,17 @@ class PasskeyCredentialDelegate: NSObject, ASAuthorizationControllerDelegate, AS
     private func cleanupTimer() {
         timeoutTimer?.invalidate()
         timeoutTimer = nil
+    }
+
+    private func platformRegistrationTransports() -> [String] {
+        if #available(iOS 16.0, *) {
+            return ["internal", "hybrid"]
+        }
+
+        return ["internal"]
+    }
+
+    private func securityKeyRegistrationTransports() -> [String] {
+        return ["nfc", "usb"]
     }
 }

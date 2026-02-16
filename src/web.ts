@@ -84,12 +84,36 @@ export class WebPasskeyPlugin extends WebPlugin implements PasskeyPlugin {
       }
       const attestationResponse = credential.response as AuthenticatorAttestationResponse;
       if (credential.response instanceof AuthenticatorAttestationResponse) {
+        const getAuthenticatorData = (attestationResponse as any).getAuthenticatorData?.bind(
+          attestationResponse,
+        ) as (() => ArrayBuffer | undefined) | undefined;
+        const getPublicKey = (attestationResponse as any).getPublicKey?.bind(
+          attestationResponse,
+        ) as (() => ArrayBuffer | undefined) | undefined;
+        const getPublicKeyAlgorithm = (attestationResponse as any).getPublicKeyAlgorithm?.bind(
+          attestationResponse,
+        ) as (() => number | undefined) | undefined;
+        const getTransports = (attestationResponse as any).getTransports?.bind(
+          attestationResponse,
+        ) as (() => string[] | undefined) | undefined;
+
+        const attachment = this.toAuthenticatorAttachment(
+          (credential as any).authenticatorAttachment as string | undefined,
+        );
+
         return {
           id: credential.id,
           rawId: this.toBase64url(new Uint8Array(credential.rawId)),
+          type: 'public-key',
+          authenticatorAttachment: attachment,
+          clientExtensionResults: credential.getClientExtensionResults?.() ?? {},
           response: {
             attestationObject: this.toBase64url(new Uint8Array(attestationResponse.attestationObject)),
             clientDataJSON: this.toBase64url(new Uint8Array(attestationResponse.clientDataJSON)),
+            authenticatorData: this.toOptionalBase64url(getAuthenticatorData?.()),
+            publicKey: this.toOptionalBase64url(getPublicKey?.()),
+            publicKeyAlgorithm: getPublicKeyAlgorithm?.(),
+            transports: getTransports?.(),
           },
         };
       } else {
@@ -180,7 +204,11 @@ export class WebPasskeyPlugin extends WebPlugin implements PasskeyPlugin {
       return {
         id: publicKeyCredential.id,
         rawId: this.toBase64url(new Uint8Array(publicKeyCredential.rawId)),
-        type: publicKeyCredential.type,
+        type: 'public-key',
+        authenticatorAttachment: this.toAuthenticatorAttachment(
+          (publicKeyCredential as any).authenticatorAttachment as string | undefined,
+        ),
+        clientExtensionResults: publicKeyCredential.getClientExtensionResults?.() ?? {},
         response: {
           clientDataJSON: this.toBase64url(new Uint8Array(assertionResponse.clientDataJSON)),
           authenticatorData: this.toBase64url(new Uint8Array(assertionResponse.authenticatorData)),
@@ -221,10 +249,10 @@ export class WebPasskeyPlugin extends WebPlugin implements PasskeyPlugin {
    */
   toPublicKeyCredentialCreationOptions(safe: PublicKeyCreationOptions): PublicKeyCredentialCreationOptions {
     return {
-      challenge: this.base64urlToUint8Array(safe.challenge),
+      challenge: this.base64urlToArrayBuffer(safe.challenge),
       rp: safe.rp,
       user: {
-        id: this.base64urlToUint8Array(safe.user.id),
+        id: this.base64urlToArrayBuffer(safe.user.id),
         name: safe.user.name,
         displayName: safe.user.displayName,
       },
@@ -234,7 +262,7 @@ export class WebPasskeyPlugin extends WebPlugin implements PasskeyPlugin {
       attestation: safe.attestation,
       extensions: safe.extensions,
       excludeCredentials: safe.excludeCredentials?.map((cred) => ({
-        id: this.base64urlToUint8Array(cred.id),
+        id: this.base64urlToArrayBuffer(cred.id),
         type: 'public-key' as const,
         transports: cred.transports,
       })),
@@ -286,9 +314,9 @@ export class WebPasskeyPlugin extends WebPlugin implements PasskeyPlugin {
     crossPlatform: PublicKeyAuthenticationOptions,
   ): PublicKeyCredentialRequestOptions {
     return {
-      challenge: this.base64urlToUint8Array(crossPlatform.challenge),
+      challenge: this.base64urlToArrayBuffer(crossPlatform.challenge),
       allowCredentials: crossPlatform.allowCredentials?.map((cred) => ({
-        id: this.base64urlToUint8Array(cred.id),
+        id: this.base64urlToArrayBuffer(cred.id),
         type: 'public-key',
         transports: cred.transports,
       })),
@@ -297,5 +325,27 @@ export class WebPasskeyPlugin extends WebPlugin implements PasskeyPlugin {
       userVerification: crossPlatform.userVerification,
       extensions: crossPlatform.extensions,
     };
+  }
+
+  private toOptionalBase64url(value?: ArrayBuffer | null): string | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    return this.toBase64url(new Uint8Array(value));
+  }
+
+  private toAuthenticatorAttachment(
+    value?: string | null,
+  ): 'platform' | 'cross-platform' | undefined {
+    if (value === 'platform' || value === 'cross-platform') {
+      return value;
+    }
+
+    return undefined;
+  }
+
+  private base64urlToArrayBuffer(value: string): ArrayBuffer {
+    return this.base64urlToUint8Array(value).buffer as ArrayBuffer;
   }
 }

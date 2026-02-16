@@ -33,6 +33,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.TimeoutCancellationException
+import org.json.JSONArray
 import org.json.JSONObject
 import android.util.Base64
 
@@ -122,6 +123,7 @@ class PasskeyPlugin : Plugin() {
         // Parse and validate authenticatorAttachment
         val authenticatorSelection = publicKey.optJSONObject("authenticatorSelection")
         val authenticatorAttachment = authenticatorSelection?.optString("authenticatorAttachment")
+        val residentKey = authenticatorSelection?.optString("residentKey")
 
         // Validate authenticatorAttachment value if present
         if (authenticatorAttachment != null && authenticatorAttachment.isNotEmpty() &&
@@ -131,6 +133,19 @@ class PasskeyPlugin : Plugin() {
                 call,
                 code = ErrorCodes.INVALID_INPUT,
                 message = "Invalid authenticatorAttachment: must be 'platform' or 'cross-platform', got '$authenticatorAttachment'"
+            )
+            return
+        }
+
+        // Validate residentKey value if present
+        if (residentKey != null && residentKey.isNotEmpty() &&
+            residentKey != "discouraged" &&
+            residentKey != "preferred" &&
+            residentKey != "required") {
+            handlePluginError(
+                call,
+                code = ErrorCodes.INVALID_INPUT,
+                message = "Invalid residentKey: must be 'discouraged', 'preferred', or 'required', got '$residentKey'"
             )
             return
         }
@@ -198,13 +213,37 @@ class PasskeyPlugin : Plugin() {
                         handlePluginError(call, message = "Malformed response: missing 'response' field")
                         return@withTimeout
                     }
+                    val transportHints = responseField.optJSONArray("transports")
+                        ?: inferTransports(authenticatorAttachment)
+                    val resolvedAuthenticatorAttachment =
+                        registrationResponseJson.optString("authenticatorAttachment").takeIf { it.isNotBlank() }
+                            ?: authenticatorAttachment
+
                     val passkeyResponse = JSObject().apply {
                         put("id", registrationResponseJson.optString("id"))
                         put("rawId", registrationResponseJson.optString("rawId")) // base64url string
-                        put("type", registrationResponseJson.optString("type"))
+                        val type = registrationResponseJson.optString("type")
+                        put("type", if (type.isBlank()) "public-key" else type)
+                        if (!resolvedAuthenticatorAttachment.isNullOrBlank()) {
+                            put("authenticatorAttachment", resolvedAuthenticatorAttachment)
+                        }
+                        put(
+                            "clientExtensionResults",
+                            registrationResponseJson.optJSONObject("clientExtensionResults") ?: JSObject()
+                        )
                         put("response", JSObject().apply {
                             put("attestationObject", responseField.optString("attestationObject"))
                             put("clientDataJSON", responseField.optString("clientDataJSON"))
+                            if (responseField.has("authenticatorData")) {
+                                put("authenticatorData", responseField.optString("authenticatorData"))
+                            }
+                            if (responseField.has("publicKey")) {
+                                put("publicKey", responseField.optString("publicKey"))
+                            }
+                            if (responseField.has("publicKeyAlgorithm")) {
+                                put("publicKeyAlgorithm", responseField.optInt("publicKeyAlgorithm"))
+                            }
+                            put("transports", transportHints)
                         })
                     }
 
@@ -392,10 +431,18 @@ class PasskeyPlugin : Plugin() {
                     handlePluginError(call, message = "Malformed response: missing 'response' field")
                     return@withTimeout
                 }
+                val resolvedAuthenticatorAttachment =
+                    authResponseJson.optString("authenticatorAttachment").takeIf { it.isNotBlank() }
+                        ?: authenticatorAttachment
                 val passkeyResponse = JSObject().apply {
                     put("id", authResponseJson.optString("id"))
                     put("rawId", authResponseJson.optString("rawId"))
-                    put("type", authResponseJson.optString("type"))
+                    val type = authResponseJson.optString("type")
+                    put("type", if (type.isBlank()) "public-key" else type)
+                    if (!resolvedAuthenticatorAttachment.isNullOrBlank()) {
+                        put("authenticatorAttachment", resolvedAuthenticatorAttachment)
+                    }
+                    put("clientExtensionResults", authResponseJson.optJSONObject("clientExtensionResults") ?: JSObject())
                     put("response", JSObject().apply {
                         put("clientDataJSON", responseField.optString("clientDataJSON"))
                         put("authenticatorData", responseField.optString("authenticatorData"))
@@ -520,6 +567,14 @@ class PasskeyPlugin : Plugin() {
             true
         } catch (e: Exception) {
             false
+        }
+    }
+
+    private fun inferTransports(authenticatorAttachment: String?): JSONArray {
+        return if (authenticatorAttachment == "cross-platform") {
+            JSONArray(listOf("nfc", "usb"))
+        } else {
+            JSONArray(listOf("internal", "hybrid"))
         }
     }
 }

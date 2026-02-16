@@ -64,6 +64,11 @@ export interface PublicKeyAuthenticationOptions {
   }[];
   /** Relying Party identifier - must match the RP ID used during registration */
   rpId?: string;
+  /**
+   * Preferred authenticator type.
+   * Supported natively on iOS/Android; currently optional for web parity.
+   */
+  authenticatorAttachment?: 'platform' | 'cross-platform';
   /** Maximum time in milliseconds for the operation to complete */
   timeout?: number;
   /** Requirement for user verification (biometric, PIN, etc.) */
@@ -90,12 +95,43 @@ export interface PasskeyCreateResult {
   id: string;
   /** Base64url-encoded raw credential identifier (same as id but as ArrayBuffer) */
   rawId: string; // base64url string;
+  /** Credential type */
+  type: 'public-key';
+  /**
+   * Authenticator type, when surfaced by platform APIs.
+   * Some platform/provider combinations may omit this field.
+   */
+  authenticatorAttachment?: 'platform' | 'cross-platform';
+  /**
+   * Extension outputs. simplewebauthn expects this field; plugin responses may omit it.
+   */
+  clientExtensionResults?: any;
   /** Authenticator attestation response containing verification data */
   response: {
     /** Base64url-encoded attestation object containing the new public key and metadata */
     attestationObject: string; // base64url string;
     /** Base64url-encoded client data JSON containing challenge and origin information */
     clientDataJSON: string; // base64url string;
+    /**
+     * Base64url-encoded authenticatorData when surfaced by platform APIs.
+     * Optional because not all providers expose it directly at registration time.
+     */
+    authenticatorData?: string;
+    /**
+     * Authenticator transports for future allowCredentials hints.
+     * Optional because not all providers expose transports in registration response.
+     */
+    transports?: string[];
+    /**
+     * Base64url-encoded public key (COSE/SubjectPublicKeyInfo-derived bytes depending on platform).
+     * Optional because some providers only expose attestationObject.
+     */
+    publicKey?: string;
+    /**
+     * COSE algorithm identifier (for example -7 for ES256).
+     * Optional because some providers do not return this directly.
+     */
+    publicKeyAlgorithm?: number;
   };
 }
 
@@ -108,8 +144,17 @@ export interface PasskeyAuthResult {
   id: string;
   /** Base64url-encoded raw credential identifier (same as id but as ArrayBuffer) */
   rawId: string; // base64url
-  /** Credential type (typically 'public-key') */
-  type: string;
+  /** Credential type */
+  type: 'public-key';
+  /**
+   * Authenticator type, when surfaced by platform APIs.
+   * Some platform/provider combinations may omit this field.
+   */
+  authenticatorAttachment?: 'platform' | 'cross-platform';
+  /**
+   * Extension outputs. simplewebauthn expects this field; plugin responses may omit it.
+   */
+  clientExtensionResults?: any;
   /** Authenticator assertion response containing verification data */
   response: {
     /** Base64url-encoded client data JSON containing challenge and origin information */
