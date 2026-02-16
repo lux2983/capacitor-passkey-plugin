@@ -71,6 +71,7 @@ Adapter-thrown errors include a mapped DOM-style `name` and `pluginErrorCode`.
 - [Platform Setup](docs/platform-setup.md)
 - [API Reference](docs/api-reference.md)
 - [Troubleshooting](docs/troubleshooting.md)
+- [Publishing](docs/publishing.md)
 - [Architecture](docs/architecture.md)
 - [Android Guide](docs/android.md)
 - [iOS Guide](docs/ios.md)

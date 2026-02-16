@@ -8,7 +8,7 @@ import type {
   PasskeyAuthResult,
   PasskeyAuthenticationOptions,
   PublicKeyAuthenticationOptions,
-} from './definitions';
+} from './definitions.js';
 
 /**
  * Web implementation of the PasskeyPlugin using WebAuthn API

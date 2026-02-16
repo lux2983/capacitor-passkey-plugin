@@ -1,12 +1,22 @@
 {
   "name": "capacitor-passkey-plugin",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "description": "Cross-platform WebAuthn (Passkeys) plugin for Capacitor",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "adapter": [
+        "dist/esm/adapter.d.ts"
+      ],
+      "storage": [
+        "dist/esm/storage.d.ts"
+      ]
+    }
+  },
   "unpkg": "dist/plugin.js",
-  "homepage": "https://github.com/Argo-Navis-Dev/capacitor-passkey-plugin/blob/main/README.md",
+  "homepage": "https://github.com/lux2983/capacitor-passkey-plugin/blob/main/README.md",
   "publishConfig": {
     "access": "public"
   },
@@ -31,7 +41,6 @@
     "android/build.gradle",
     "dist/",
     "ios/Sources",
-    "ios/Tests",
     "Package.swift",
     "CapacitorPasskeyPlugin.podspec",
     "README.md",
@@ -42,10 +51,10 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Argo-Navis-Dev/capacitor-passkey-plugin.git"
+    "url": "git+https://github.com/lux2983/capacitor-passkey-plugin.git"
   },
   "bugs": {
-    "url": "https://github.com/Argo-Navis-Dev/capacitor-passkey-plugin/issues"
+    "url": "https://github.com/lux2983/capacitor-passkey-plugin/issues"
   },
   "keywords": [
     "capacitor",

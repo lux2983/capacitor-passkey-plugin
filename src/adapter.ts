@@ -6,8 +6,8 @@ import type {
   RegistrationResponseJSON,
 } from '@simplewebauthn/browser';
 
-import type { PasskeyPlugin, PasskeyCreateResult } from './definitions';
-import { mapPluginError } from './errors';
+import type { PasskeyPlugin, PasskeyCreateResult } from './definitions.js';
+import { mapPluginError } from './errors.js';
 
 type Attachment = 'platform' | 'cross-platform';
 
