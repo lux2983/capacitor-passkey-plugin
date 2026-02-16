@@ -31,10 +31,7 @@ export interface StorageAdapter {
   getByContract(contractId: string): Promise<StoredCredential[]>;
   getAll(): Promise<StoredCredential[]>;
   delete(credentialId: string): Promise<void>;
-  update(
-    credentialId: string,
-    updates: Partial<Omit<StoredCredential, 'credentialId' | 'publicKey'>>,
-  ): Promise<void>;
+  update(credentialId: string, updates: Partial<Omit<StoredCredential, 'credentialId' | 'publicKey'>>): Promise<void>;
   clear(): Promise<void>;
   saveSession(session: StoredSession): Promise<void>;
   getSession(): Promise<StoredSession | null>;

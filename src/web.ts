@@ -84,18 +84,18 @@ export class WebPasskeyPlugin extends WebPlugin implements PasskeyPlugin {
       }
       const attestationResponse = credential.response as AuthenticatorAttestationResponse;
       if (credential.response instanceof AuthenticatorAttestationResponse) {
-        const getAuthenticatorData = (attestationResponse as any).getAuthenticatorData?.bind(
-          attestationResponse,
-        ) as (() => ArrayBuffer | undefined) | undefined;
-        const getPublicKey = (attestationResponse as any).getPublicKey?.bind(
-          attestationResponse,
-        ) as (() => ArrayBuffer | undefined) | undefined;
-        const getPublicKeyAlgorithm = (attestationResponse as any).getPublicKeyAlgorithm?.bind(
-          attestationResponse,
-        ) as (() => number | undefined) | undefined;
-        const getTransports = (attestationResponse as any).getTransports?.bind(
-          attestationResponse,
-        ) as (() => string[] | undefined) | undefined;
+        const getAuthenticatorData = (attestationResponse as any).getAuthenticatorData?.bind(attestationResponse) as
+          | (() => ArrayBuffer | undefined)
+          | undefined;
+        const getPublicKey = (attestationResponse as any).getPublicKey?.bind(attestationResponse) as
+          | (() => ArrayBuffer | undefined)
+          | undefined;
+        const getPublicKeyAlgorithm = (attestationResponse as any).getPublicKeyAlgorithm?.bind(attestationResponse) as
+          | (() => number | undefined)
+          | undefined;
+        const getTransports = (attestationResponse as any).getTransports?.bind(attestationResponse) as
+          | (() => string[] | undefined)
+          | undefined;
 
         const attachment = this.toAuthenticatorAttachment(
           (credential as any).authenticatorAttachment as string | undefined,
@@ -335,9 +335,7 @@ export class WebPasskeyPlugin extends WebPlugin implements PasskeyPlugin {
     return this.toBase64url(new Uint8Array(value));
   }
 
-  private toAuthenticatorAttachment(
-    value?: string | null,
-  ): 'platform' | 'cross-platform' | undefined {
+  private toAuthenticatorAttachment(value?: string | null): 'platform' | 'cross-platform' | undefined {
     if (value === 'platform' || value === 'cross-platform') {
       return value;
     }

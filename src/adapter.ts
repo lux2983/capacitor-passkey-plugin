@@ -5,6 +5,7 @@ import type {
   PublicKeyCredentialRequestOptionsJSON,
   RegistrationResponseJSON,
 } from '@simplewebauthn/browser';
+
 import type { PasskeyPlugin, PasskeyCreateResult } from './definitions';
 import { mapPluginError } from './errors';
 
@@ -35,15 +36,16 @@ function normalizeUserHandle(value?: string): string | undefined {
 }
 
 function fromBase64Url(input: string): Uint8Array {
-  const base64 = input.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(input.length / 4) * 4, '=');
+  const base64 = input
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+    .padEnd(Math.ceil(input.length / 4) * 4, '=');
   const globalBuffer = (globalThis as any).Buffer;
   if (typeof atob !== 'function' && !globalBuffer) {
     throw new Error('No base64 decoder available in this runtime');
   }
 
-  const binary = typeof atob === 'function'
-    ? atob(base64)
-    : globalBuffer.from(base64, 'base64').toString('binary');
+  const binary = typeof atob === 'function' ? atob(base64) : globalBuffer.from(base64, 'base64').toString('binary');
 
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i += 1) {
@@ -60,16 +62,12 @@ function toBase64Url(input: Uint8Array): string {
     throw new Error('No base64 encoder available in this runtime');
   }
 
-  const base64 = typeof btoa === 'function'
-    ? btoa(binary)
-    : globalBuffer.from(binary, 'binary').toString('base64');
+  const base64 = typeof btoa === 'function' ? btoa(binary) : globalBuffer.from(binary, 'binary').toString('base64');
 
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 }
 
-function extractPublicKeyFromRegistrationResponse(
-  response: PasskeyCreateResult['response'],
-): string | undefined {
+function extractPublicKeyFromRegistrationResponse(response: PasskeyCreateResult['response']): string | undefined {
   if (response.publicKey) {
     return response.publicKey;
   }
@@ -181,7 +179,9 @@ export function asSimpleWebAuthn(plugin: PasskeyPlugin): {
   }) => Promise<AuthenticationResponseJSON>;
 } {
   return {
-    startRegistration: async ({ optionsJSON }: {
+    startRegistration: async ({
+      optionsJSON,
+    }: {
       optionsJSON: PublicKeyCredentialCreationOptionsJSON;
       useAutoRegister?: boolean;
     }) => {
@@ -196,7 +196,9 @@ export function asSimpleWebAuthn(plugin: PasskeyPlugin): {
       }
     },
 
-    startAuthentication: async ({ optionsJSON }: {
+    startAuthentication: async ({
+      optionsJSON,
+    }: {
       optionsJSON: PublicKeyCredentialRequestOptionsJSON;
       useBrowserAutofill?: boolean;
       verifyBrowserAutofillInput?: boolean;

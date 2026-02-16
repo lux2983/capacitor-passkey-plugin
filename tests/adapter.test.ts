@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { PasskeyPlugin } from '../src/definitions';
+
 import { asSimpleWebAuthn } from '../src/adapter';
+import type { PasskeyPlugin } from '../src/definitions';
 
 describe('asSimpleWebAuthn', () => {
   it('wraps optionsJSON into plugin publicKey for registration', async () => {

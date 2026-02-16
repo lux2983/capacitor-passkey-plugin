@@ -73,9 +73,7 @@ export function mapPluginError(error: unknown): PasskeyError {
   const pluginCode = toPluginErrorCode(anyError?.code) ?? 'UNKNOWN_ERROR';
 
   let name = ERROR_NAME_MAP[pluginCode];
-  const message = typeof anyError?.message === 'string'
-    ? anyError.message
-    : 'Passkey operation failed';
+  const message = typeof anyError?.message === 'string' ? anyError.message : 'Passkey operation failed';
 
   if (pluginCode === 'DOM_ERROR') {
     name = inferDomErrorNameFromMessage(message) ?? 'NotAllowedError';

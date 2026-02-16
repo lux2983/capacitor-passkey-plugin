@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { mapPluginError, PasskeyError } from '../src/errors';
 
 describe('mapPluginError', () => {

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { CapacitorStorageAdapter, type StoredCredential } from '../src/storage';
 
 const memory = new Map<string, string>();
@@ -6,7 +7,8 @@ const memory = new Map<string, string>();
 vi.mock('@capacitor/preferences', () => ({
   Preferences: {
     async get({ key }: { key: string }) {
-      return { value: memory.has(key) ? memory.get(key)! : null };
+      const value = memory.get(key);
+      return { value: value ?? null };
     },
     async set({ key, value }: { key: string; value: string }) {
       memory.set(key, value);
@@ -41,7 +43,7 @@ describe('CapacitorStorageAdapter', () => {
 
     expect(result).not.toBeNull();
     expect(result?.credentialId).toBe('cred-1');
-    expect(Array.from(result!.publicKey)).toEqual([1, 2, 3, 4]);
+    expect(Array.from(result?.publicKey ?? new Uint8Array())).toEqual([1, 2, 3, 4]);
   });
 
   it('filters credentials by contract', async () => {
@@ -64,7 +66,7 @@ describe('CapacitorStorageAdapter', () => {
     expect(result?.nickname).toBe('after');
     expect(result?.lastUsedAt).toBe(2);
     expect(result?.credentialId).toBe('cred-1');
-    expect(Array.from(result!.publicKey)).toEqual([1, 2, 3, 4]);
+    expect(Array.from(result?.publicKey ?? new Uint8Array())).toEqual([1, 2, 3, 4]);
   });
 
   it('handles session save/get/clear', async () => {
