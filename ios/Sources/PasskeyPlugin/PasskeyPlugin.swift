@@ -149,10 +149,6 @@ public class PasskeyPlugin: CAPPlugin, CAPBridgedPlugin {
                 return PasskeyPluginErrorCode.invalidInput.rawValue
             case .credentialExport:
                 return PasskeyPluginErrorCode.invalidInput.rawValue
-            case .preferSignInWithApple:
-                return PasskeyPluginErrorCode.unsupported.rawValue
-            case .deviceNotConfiguredForPasskeyCreation:
-                return PasskeyPluginErrorCode.unsupported.rawValue
             @unknown default:
                 return PasskeyPluginErrorCode.unknown.rawValue
             }
