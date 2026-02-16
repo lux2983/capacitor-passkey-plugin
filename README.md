@@ -20,6 +20,16 @@ npx cap sync
 
 `@capacitor/preferences` is required for `CapacitorStorageAdapter`.
 
+## Developer Notes
+
+- The maintained fork is currently consumed by the demo via a local tarball, not a published npm `1.0.0` release.
+- If you need to test fork changes in the demo without npm publishing:
+  1. In this plugin repo, run `npm pack`.
+  2. Copy the generated `.tgz` file into `capacitor-smart-account-demo/vendor/`.
+  3. Update `capacitor-smart-account-demo/package.json` if the tarball filename changed.
+  4. In the demo repo, run `npm install` and `npm run sync`.
+  5. Re-run `npm run verify:ios` and `npm run verify:android` in the demo repo.
+
 ## Quick Start (Smart Account Kit)
 
 ```ts
