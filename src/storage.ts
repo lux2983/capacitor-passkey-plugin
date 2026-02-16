@@ -1,4 +1,5 @@
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/browser';
+import { Preferences } from '@capacitor/preferences';
 
 export type CredentialDeploymentStatus = 'pending' | 'failed';
 
@@ -112,7 +113,6 @@ function deserializeCredential(payload: SerializedCredential): StoredCredential 
  */
 export class CapacitorStorageAdapter implements StorageAdapter {
   private readonly prefix: string;
-  private preferencesPromise?: Promise<PreferencesAPI>;
 
   constructor(prefix: string = DEFAULT_PREFIX) {
     this.prefix = prefix;
@@ -237,23 +237,7 @@ export class CapacitorStorageAdapter implements StorageAdapter {
   }
 
   private async getPreferences(): Promise<PreferencesAPI> {
-    if (!this.preferencesPromise) {
-      this.preferencesPromise = import('@capacitor/preferences')
-        .then((module) => {
-          if (!module.Preferences) {
-            throw new Error();
-          }
-
-          return module.Preferences as PreferencesAPI;
-        })
-        .catch(() => {
-          throw new Error(
-            'CapacitorStorageAdapter requires @capacitor/preferences. Install it with: npm install @capacitor/preferences',
-          );
-        });
-    }
-
-    return this.preferencesPromise;
+    return Preferences as PreferencesAPI;
   }
 
   private credentialKey(credentialId: string): string {
