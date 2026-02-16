@@ -2,6 +2,12 @@
 
 Cross-platform passkey plugin for Capacitor (iOS, Android, Web) with Smart Account Kit integration support.
 
+## Current Status
+
+- This repository is in pre-release validation and external review.
+- Planned release window: March 2026.
+- The current `1.0.0` state should be treated as release-candidate quality under active testing.
+
 ## Features
 
 - Native passkey create/authenticate via iOS AuthenticationServices and Android Credential Manager
@@ -29,6 +35,10 @@ npx cap sync
   3. Update `capacitor-smart-account-demo/package.json` if the tarball filename changed.
   4. In the demo repo, run `npm install` and `npm run sync`.
   5. Re-run `npm run verify:ios` and `npm run verify:android` in the demo repo.
+- Local Android verification requires SDK environment variables:
+  - `ANDROID_HOME=$HOME/Library/Android/sdk`
+  - `ANDROID_SDK_ROOT=$HOME/Library/Android/sdk`
+- On a fresh machine, the first Android verify run downloads the Gradle wrapper from `services.gradle.org`, so network access is required for that first run.
 
 ## Quick Start (Smart Account Kit)
 
@@ -74,6 +84,12 @@ Adapter-thrown errors include a mapped DOM-style `name` and `pluginErrorCode`.
 - `INTERRUPTED`
 - `NO_ACTIVITY`
 - `UNKNOWN_ERROR`
+
+## Known Warnings (Current)
+
+- Android Kotlin emits a non-blocking warning at `android/src/main/java/com/argonavisdev/capacitorpasskeyplugin/PasskeyPlugin.kt:450`.
+- Android builds may warn that current AGP support was tested up to `compileSdk = 35` while the project uses `compileSdk = 36`.
+- Gradle may report deprecated features that become relevant when upgrading to Gradle 9+.
 
 ## Documentation
 

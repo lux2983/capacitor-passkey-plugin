@@ -95,6 +95,9 @@ Checks:
 - Node 18+
 - iOS: Xcode with iOS 15+ SDK support
 - Android: API 28+ target support, JDK compatible with your AGP version
+- Android SDK env variables set for local CLI builds:
+  - `ANDROID_HOME=$HOME/Library/Android/sdk`
+  - `ANDROID_SDK_ROOT=$HOME/Library/Android/sdk`
 
 Useful commands:
 
@@ -109,6 +112,8 @@ If native projects are out of sync:
 ```bash
 npx cap sync
 ```
+
+On fresh environments, Android builds may fail before Gradle is downloaded. The first run requires network access to fetch the wrapper distribution from `services.gradle.org`.
 
 ## 9. `PROVIDER_CONFIG_ERROR` on Android
 
@@ -125,3 +130,10 @@ Fixes:
 `CANCELLED` and `NO_CREDENTIAL` can look similar in UX. Handle them differently:
 - `CANCELLED`: user dismissed prompt -> show retry option
 - `NO_CREDENTIAL`: nothing matched -> offer wallet creation or different account path
+
+## 11. Known non-blocking Android warnings during verification
+
+Current warnings seen in verification do not fail builds but should be tracked:
+- Kotlin warning at `android/src/main/java/com/argonavisdev/capacitorpasskeyplugin/PasskeyPlugin.kt:450`.
+- AGP warning that current plugin version was tested up to `compileSdk = 35` while the project uses `compileSdk = 36`.
+- Gradle deprecation warnings indicating future Gradle 9 compatibility work.
